@@ -1,0 +1,7 @@
+sentencepiece
+transformers
+# torch==1.10.0
+torch==2.4.1
+sagemaker
+numpy
+pandas

@@ -41,8 +41,19 @@ def predict_fn(input_data, model_data):
         max_length=256,  # Adjust max_length based on your needs
         num_beams=4,     # Number of beams for beam search
         early_stopping=True,
+        output_scores=True,
+        return_dict_in_generate=True 
     )
-    decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    # Get confidence score
+    scores = outputs.sequences_scores[0].item()
+    print(f"outputs sequences_scores : {scores}")
+    
+    # Set a confidence threshold
+    threshold = -10.0
+    if scores < threshold:
+        return "Request couldnot be translated into action. Please try again."
+
+    decoded_output = tokenizer.decode(outputs.sequences[0], skip_special_tokens=True)
     return decoded_output
 
 # Define output data processing function

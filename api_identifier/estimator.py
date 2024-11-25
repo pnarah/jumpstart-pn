@@ -10,18 +10,18 @@ print("Current working directory:", os.getcwd())
 
 # Specify S3 paths
 bucket = 'apimodelgrp-bkt'
-training_data_path = f's3://{bucket}/trainingdata/'  # Path to training data in S3
-output_path = f's3://{bucket}/models/'  # Where to save model artifacts in S3
+training_data_path = f's3://{bucket}/trainingdata/'
+output_path = f's3://{bucket}/models/'
 
 # Define the PyTorch Estimator
 estimator = PyTorch(
     entry_point='train.py',             
     role=role,
-    framework_version='1.10',           
-    py_version='py38',
+    framework_version='2.0',           
+    py_version='py310',
     instance_count=1,
-    instance_type='ml.m5.2xlarge',      
-    output_path=output_path,            
+    instance_type='ml.m5.xlarge',
+    output_path=output_path,
     sagemaker_session=sagemaker_session,
     dependencies=['./requirements.txt', './inference.py'],
 )
@@ -33,8 +33,8 @@ estimator.fit({'training': training_data_path})
 # Deploy the model
 predictor = estimator.deploy(
     initial_instance_count=1,
-    instance_type='ml.m5.large',
-    entry_point='inference.py',  # Specify your inference script
-    endpoint_name="apimodel-endpoint-1"  # Optional, specify your own name
+    instance_type='ml.m5.xlarge',
+    entry_point='inference.py',  
+    # endpoint_name="apimodel-endpoint-2"
 )
 
