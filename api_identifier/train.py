@@ -23,10 +23,12 @@ class APIDataset(Dataset):
 def train():
     # Initialize tokenizer and model
     tokenizer = T5Tokenizer.from_pretrained("t5-base")
+    tokenizer.model_max_length = 1024
     model = T5ForConditionalGeneration.from_pretrained("t5-base")
+    model.config.max_length = 1024
 
     # Load the training data from the SageMaker directory
-    training_data_path = os.path.join('/opt/ml/input/data/training', 'augmented_training_data_10var.json')
+    training_data_path = os.path.join('/opt/ml/input/data/training', 'augmented_trainin_data_spog.json')
     with open(training_data_path, 'r') as f:
         training_data = json.load(f)
 
@@ -77,7 +79,7 @@ def train():
 
     # Save the trained model to the specified directory
     model_dir = os.environ.get('SM_MODEL_DIR', '/opt/ml/model')
-    model_save_path = os.path.join(model_dir, 'apimodel.pth')
+    model_save_path = os.path.join(model_dir, 'spogmodel1.pth')
     torch.save(model.state_dict(), model_save_path)
 
 if __name__ == '__main__':

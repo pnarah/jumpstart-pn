@@ -24,7 +24,7 @@ pytorch_model = PyTorchModel(
 predictor = pytorch_model.deploy(
     initial_instance_count=1,
     instance_type="ml.m5.large",
-    # endpoint_name="apimodel-endpoint-2x"  # Optional, specify your own name, once it was created duplicate error will come if not changed
+    endpoint_name="spogmodel-endpoint-play01"  # Optional, specify your own name, once it was created duplicate error will come if not changed
 )
 
 
@@ -35,5 +35,5 @@ print(f"Endpoint Name: {endpoint_name}")
 
 
 # {
-#     "input_text": "How to add a user?"
+#     "inputs": "How to add a user?"
 # } 

@@ -2,16 +2,20 @@ import os
 import torch
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 
+
 # Define model loading function
 def model_fn(model_dir):
     """Load the PyTorch model from the model directory."""
-    model_path = os.path.join(model_dir, 'apimodel.pth')
+    model_path = os.path.join(model_dir, 'spogmodel1.pth')
     tokenizer = T5Tokenizer.from_pretrained("t5-base")
+    tokenizer.model_max_length = 1024
     model = T5ForConditionalGeneration.from_pretrained("t5-base")
+    model.config.max_length = 1024
     model.load_state_dict(torch.load(model_path))
     # model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     model.eval()
     return {"model": model, "tokenizer": tokenizer}
+
 
 # Define input data processing function
 def input_fn(input_data, content_type):
@@ -24,6 +28,7 @@ def input_fn(input_data, content_type):
         return data["inputs"]
     else:
         raise ValueError(f"Unsupported content type: {content_type}")
+
 
 # Define inference logic
 def predict_fn(input_data, model_data):
@@ -38,18 +43,31 @@ def predict_fn(input_data, model_data):
     outputs = model.generate(
         input_ids=inputs.input_ids,
         attention_mask=inputs.attention_mask,
-        max_length=256,  # Adjust max_length based on your needs
-        num_beams=4,     # Number of beams for beam search
+        max_length=1024,  # Adjust max_length based on your needs
+        num_beams=4,  # Number of beams for beam search
         early_stopping=True,
+        output_scores=True,
+        return_dict_in_generate=True
     )
-    decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    # Get confidence score
+    scores = outputs.sequences_scores[0].item()
+    print(f"outputs sequences_scores : {scores}")
+
+    # Set a confidence threshold
+    threshold = -0.03
+    if scores < threshold:
+        return "Request couldnot be translated into action. Please try again."
+
+    decoded_output = tokenizer.decode(outputs.sequences[0], skip_special_tokens=True)
     return decoded_output
+
 
 # Define output data processing function
 def output_fn(prediction, accept):
     """Serialize the predictions to JSON."""
     if accept == "application/json":
         import json
+        print(f"output_fn prediction : {prediction}")
         return json.dumps({"result": prediction}), "application/json"
     else:
         raise ValueError(f"Unsupported accept type: {accept}")

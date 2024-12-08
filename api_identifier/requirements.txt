@@ -1,3 +1,6 @@
-transformers
-nltk
 sentencepiece
+transformers
+torch==2.4.1
+sagemaker
+numpy
+pandas
